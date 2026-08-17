@@ -15,9 +15,10 @@ def monitor_following_distance(distances: list[float], speeds: list[float]) -> t
     if not distances:
         return 0, 0.0, 0
     
-    tailgating_sec = 0
-    tailgate_incidents = 0
+    tailgate_sec = 0
+    incidents = 0
     min_dist = distances[0]
+    is_tailgating = False
     
     for i in range(len(distances)):
         d = distances[i]
@@ -28,13 +29,11 @@ def monitor_following_distance(distances: list[float], speeds: list[float]) -> t
             min_dist = d
             
         if d < safe_dist:
-            tailgating_sec += 1
-            
-            if i == 0:
-                tailgate_incidents += 1
-            else:
-                prev_safe_dist = speeds[i - 1] * 0.5
-                if distances[i - 1] >= prev_safe_dist:
-                    tailgate_incidents += 1
+            tailgate_sec += 1
+            if not is_tailgating:
+                incidents += 1
+                is_tailgating = True
+        else:
+            is_tailgating = False
                 
-    return tailgating_sec, float(min_dist), tailgate_incidents
+    return tailgate_sec, float(min_dist), incidents
