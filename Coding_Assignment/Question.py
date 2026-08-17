@@ -25,7 +25,7 @@ def monitor_following_distance(distances: list[float], speeds: list[float]) -> t
         s = speeds[i]
         safe_dist = s * 0.5
         
-        if d < min_dist:
+        if d < minimum_distance:
             minimum_distance = d
             
         if d < safe_dist:
