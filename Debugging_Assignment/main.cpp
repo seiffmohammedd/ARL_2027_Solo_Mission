@@ -9,13 +9,14 @@ int main() {
     const arl::SafetyConfig config{0.60, 40.0, 1.50, 1.0, 5.0};
     const double speedKph = 36.0;
 
-    const std::vector<arl::Detection> detections{
-        {"barrier", 18.0, 1.0, 0.90},
-        {"crate", 25.0, -0.5, 0.75},
-        {"sign", 30.0, -8.0, 0.55},
-        {"debris", 45.0, 0.0, 0.99},
-        {"cone", 12.0, 4.0, 0.95},
-    };
+const std::vector<arl::Detection> detections{
+    {"wall",     10.0,  0.5, 0.90},
+    {"box",      18.0, -1.5, 0.80},
+    {"person",    5.0,  2.0, 0.95},
+    {"bad_conf",  8.0,  0.0, 0.40},
+    {"too_far",  50.0,  0.0, 0.99},
+    {"behind",   -5.0,  0.5, 0.90},
+};
 
     const auto obstacles = arl::processDetections(detections, pose, config);
     const auto nearest = arl::findNearestObstacle(obstacles);
