@@ -13,50 +13,30 @@ bool isFinite(const Detection& detection) {
 
 }  // namespace
 
-std::vector<Obstacle> processDetections(
-    const std::vector<Detection>& detections,
-    const RoverPose& pose,
-    const SafetyConfig& config) {
-
+std::vector<Obstacle> processDetections( const std::vector<Detection>& detections, const RoverPose& pose, const SafetyConfig& config) {
     std::vector<Obstacle> obstacles;
 
     const double pi = std::acos(-1.0);
 
-    const double headingRadians =
-        pose.headingDegrees * pi / 180.0;
+    const double headingRadians = pose.headingDegrees * pi / 180.0;
 
     const double cosine = std::cos(headingRadians);
     const double sine = std::sin(headingRadians);
 
     for (const auto& detection : detections) {
 
-        const double range =
-            std::hypot(detection.forward, detection.left);
+        const double range = std::hypot(detection.forward, detection.left);
 
-        const bool validConfidence =
-            detection.confidence >= config.minimumConfidence
-            && detection.confidence <= 1.0;
+        const bool validConfidence = detection.confidence >= config.minimumConfidence && detection.confidence <= 1.0;
 
-        const bool validRange =
-            range > 0.0
-            && range <= config.maximumRangeMeters;
+        const bool validRange = range > 0.0 && range <= config.maximumRangeMeters;
 
-        if (!isFinite(detection) ||
-            !validConfidence ||
-            !validRange) {
-
-            continue;
+        if (!isFinite(detection) || !validConfidence || !validRange) {
+               continue;
         }
 
-        const double worldX =
-            pose.worldX
-            + cosine * detection.forward
-            - sine * detection.left;
-
-        const double worldY =
-            pose.worldY
-            + sine * detection.forward
-            + cosine * detection.left;
+        const double worldX =  pose.worldX  + cosine * detection.forward  - sine * detection.left;
+        const double worldY = pose.worldY + sine * detection.forward + cosine * detection.left;
 
         obstacles.push_back({
             detection.id,
@@ -71,8 +51,7 @@ std::vector<Obstacle> processDetections(
     return obstacles;
 }
 
-std::optional<Obstacle> findNearestObstacle(
-    const std::vector<Obstacle>& obstacles) {
+std::optional<Obstacle> findNearestObstacle( const std::vector<Obstacle>& obstacles) {
 
     if (obstacles.empty()) {
         return std::nullopt;
@@ -89,18 +68,13 @@ std::optional<Obstacle> findNearestObstacle(
     return *nearest;
 }
 
-double calculateStoppingDistance(
-    double speedKph,
-    const SafetyConfig& config) {
+double calculateStoppingDistance(  double speedKph,  const SafetyConfig& config) {
 
     const double speedMps = speedKph / 3.6;
 
-    const double reactionDistance =
-        speedMps * config.reactionTimeSeconds;
+    const double reactionDistance = speedMps * config.reactionTimeSeconds;
 
-    const double brakingDistance =
-        speedMps * speedMps
-        / (2.0 * config.maximumDecelerationMps2);
+    const double brakingDistance = speedMps * speedMps / (2.0 * config.maximumDecelerationMps2);
 
     return reactionDistance + brakingDistance;
 }
@@ -110,24 +84,17 @@ bool shouldEmergencyBrake(
     double speedKph,
     const SafetyConfig& config) {
 
-    const double stoppingDistance =
-        calculateStoppingDistance(speedKph, config);
+    const double stoppingDistance = calculateStoppingDistance(speedKph, config);
 
     for (const auto& obstacle : obstacles) {
 
-        const bool inFront =
-            obstacle.forward >= 0.0;
+        const bool inFront = obstacle.forward >= 0.0;
 
-        const bool inLane =
-            std::abs(obstacle.left)
-            <= config.laneHalfWidthMeters;
+        const bool inLane = std::abs(obstacle.left) <= config.laneHalfWidthMeters;
 
-        const bool withinStoppingDistance =
-            obstacle.forward <= stoppingDistance;
+        const bool withinStoppingDistance = obstacle.forward <= stoppingDistance;
 
-        if (inFront &&
-            inLane &&
-            withinStoppingDistance) {
+        if (inFront && inLane && withinStoppingDistance) {
             return true;
         }
     }
